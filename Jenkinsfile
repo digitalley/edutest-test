@@ -6,7 +6,7 @@ pipeline{
         stage('Init'){
             steps{
                 script{
-                    sha1 = sh('git rev-parse --short HEAD', returnStdout=true)
+                    sha1 = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
             }
         }
@@ -20,24 +20,29 @@ pipeline{
             parallel{
                 stage('pylint'){
                     steps{
-                        sh "docker container run edu0:$sha1 pylint ."
+                        sh "docker container run edu0-test:$sha1 pylint src"
                     }
                 }
                 stage('flake8'){
                     steps{
-                        sh "docker container run edu0:$sha1 flake8"
+                        sh "docker container run edu0-test:$sha1 flake8"
                     }
                 }
                 stage('pytest'){
                     steps{
-                        sh "docker container run edu0:$sha1 pytest"
+                        sh "docker container run edu0-test:$sha1 pytest"
                     }
                 }
                 stage('bandit') {
                     steps{
-                        sh "docker container run edu0:$sha1 bandit -r src"
+                        sh "docker container run edu0-test:$sha1 bandit -r src"
                     }
                 }
+            }
+        }
+        stage('Deploy'){
+            steps{
+                sh "docker container run -d -p 8881:5000 edu0:$sha1"
             }
         }
     }

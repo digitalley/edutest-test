@@ -1,5 +1,4 @@
 import sys
-import datetime
 import logging
 
 import json_logging
@@ -35,5 +34,4 @@ def increase():
 
 @app.route('/info')
 def info():
-    global counter
     return {'counter': counter}
